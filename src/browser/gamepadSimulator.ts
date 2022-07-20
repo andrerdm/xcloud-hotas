@@ -104,6 +104,7 @@ const axeStates: Partial<Record<Direction, boolean>> = {};
 
 const getAxePosForDirection = (direction: Direction) =>
   [Direction.UP, Direction.DOWN].indexOf(direction) > -1 ? 1 : 0;
+
 const getOppositeDirection = (direction: Direction) => {
   switch (direction) {
     case Direction.UP:
@@ -116,6 +117,7 @@ const getOppositeDirection = (direction: Direction) => {
       return Direction.LEFT;
   }
 };
+
 const getValueForDirection = (direction: Direction) =>
   [Direction.UP, Direction.LEFT].indexOf(direction) > -1 ? -1 : 1;
 
@@ -134,6 +136,12 @@ export function simulateBtnUnpress(buttonIndex: number) {
   fakeController.buttons[buttonIndex].touched = false;
   fakeController.buttons[buttonIndex].pressed = false;
   fakeController.buttons[buttonIndex].value = 0;
+  fakeController.timestamp = performance.now();
+}
+
+export function simulateBtnAsAxis(buttonIndex: number, value: number) {
+  fakeController.buttons[buttonIndex].pressed = true;
+  fakeController.buttons[buttonIndex].value = value;
   fakeController.timestamp = performance.now();
 }
 
@@ -156,8 +164,8 @@ export function simulateAxeDirUnpress(axe: number, direction: Direction) {
 }
 
 export function simulateAxeMove(axe: number, x: number, y: number) {
-  fakeController.axes[axe * 2] = x;
-  fakeController.axes[axe * 2 + 1] = y;
+  fakeController.axes[axe] = x;
+  console.debug(y);
   fakeController.timestamp = performance.now();
 }
 
@@ -198,4 +206,8 @@ export function isEnabled() {
 
 export function resetGamepadGlobals() {
   navigator.getGamepads = origGetGamepads;
+}
+
+export function getOrigGamepads() {
+  return origGetGamepads();
 }

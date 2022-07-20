@@ -1,11 +1,10 @@
 {
   "manifest_version": 3,
-
-  "name": "Keyboard & Mouse for Xbox xCloud",
-  "short_name": "xCloud KB&M",
-  "description": "Play Xbox Cloud Gaming (Project xCloud) with a keyboard and mouse.",
-  "version": "2.6",
-  "author": "David Idol",
+  "name": "Flightstick and Throttle for Xbox xCloud",
+  "short_name": "xCloud HOTAS",
+  "description": "Play Xbox Cloud Gaming (Project xCloud) with a Flightstick and Throttle.",
+  "version": "0.1",
+  "author": "Andre Melo",
 
   "icons": {
     "16": "icon-16.png",
@@ -20,7 +19,7 @@
       "32": "icon-32.png"
     },
     "default_popup": "popup.html",
-    "default_title": "xCloud keyboard and mouse"
+    "default_title": "xCloud Flightstick and Throttle"
   },
 
   "content_scripts": [

@@ -1,4 +1,4 @@
-import { disableConfig, enableConfig } from './browser/browserEventProcessor';
+import { disableConfig, enableHotasConfig } from './browser/browserEventProcessor';
 import { showToast } from './browser/dom/snackbar';
 import { modifyGamepadGlobals, isEnabled as gamepadSimulatorIsEnabled } from './browser/gamepadSimulator';
 import { gameChanged, intializedMsg, Message, MessageTypes } from './shared/messages';
@@ -55,7 +55,8 @@ function handleDisableGamepad() {
 
 function handleGamepadConfigUpdate(name: string, config: GamepadConfig) {
   showToast(`'${name}' preset activated`);
-  enableConfig(config);
+  console.debug(config);
+  enableHotasConfig();
 }
 
 function connectToExtension(gameName: string | null) {

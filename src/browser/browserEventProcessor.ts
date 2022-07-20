@@ -2,9 +2,11 @@ import { CodeMap, DEFAULT_SENSITIVITY, isButtonMapping, processGamepadConfig } f
 import { createClickElement, firstClickText, secondClickText } from './dom/clickToEnableMouse';
 import {
   enableSimulator,
+  getOrigGamepads,
   simulateAxeDirPress,
   simulateAxeDirUnpress,
   simulateAxeMove,
+  simulateBtnAsAxis,
   simulateBtnPress,
   simulateBtnUnpress,
 } from './gamepadSimulator';
@@ -20,6 +22,13 @@ const listeners = {
   mouseup: null as null | EventListener,
   wheel: null as null | EventListener,
 };
+
+let flightStick: Gamepad | undefined | null;
+
+let flightStickListener: number, throttleListener: number;
+
+let flightstickPressedButtons: number[] = [];
+let throttlePressedButtons: number[] = [];
 
 const getParentElement = () => {
   return document.querySelector("[data-active='ui-container']") || document.body;
@@ -212,4 +221,90 @@ export function enableConfig(config: GamepadConfig) {
 export function disableConfig() {
   unlistenAll();
   enableSimulator(false);
+}
+
+export function disableHotasConfig() {
+  cancelAnimationFrame(flightStickListener);
+  cancelAnimationFrame(throttleListener);
+  enableSimulator(false);
+}
+
+export function enableHotasConfig() {
+  enableSimulator(true);
+  listenFlightStick();
+  listenThrottle();
+}
+
+function listenFlightStick() {
+  flightStick = getOrigGamepads().find((gamepad) => gamepad?.id.includes('T.16000M'));
+  if (flightStick) {
+    flightStick.buttons.forEach((btn, index) => {
+      if (btn.pressed && !flightstickPressedButtons.includes(index)) {
+        simulateBtnPress(index);
+        flightstickPressedButtons.push(index);
+        return;
+      }
+
+      if (!btn.pressed && flightstickPressedButtons.includes(index)) {
+        simulateBtnUnpress(index);
+        flightstickPressedButtons = flightstickPressedButtons.filter((btn) => btn != index);
+        return;
+      }
+    });
+
+    flightStick.axes.forEach((value, index) => {
+      // Leme
+      if (index == 5) {
+        if (value >= 0.0) {
+          simulateBtnAsAxis(6, value);
+          simulateBtnAsAxis(7, 0.0);
+          return;
+        } else {
+          simulateBtnAsAxis(7, (value *= -1));
+          return;
+        }
+      }
+
+      // Profundor e Aileron
+      if (index == 0 || index == 1) {
+        simulateAxeMove(index, value, 0);
+        return;
+      }
+
+      if (index == 6) {
+        simulateAxeMove(3, value, 0);
+      }
+    });
+  }
+
+  flightStickListener = requestAnimationFrame(listenFlightStick);
+}
+
+function listenThrottle() {
+  const throttle = getOrigGamepads().find((gamepad) => gamepad?.id.includes('TWCS Throttle'));
+  if (throttle) {
+    throttle.buttons.forEach((btn, index) => {
+      if (btn.pressed && !throttlePressedButtons.includes(index)) {
+        simulateBtnPress(index);
+        throttlePressedButtons.push(index);
+        return;
+      }
+
+      if (!btn.pressed && throttlePressedButtons.includes(index)) {
+        simulateBtnUnpress(index);
+        throttlePressedButtons = throttlePressedButtons.filter((btn) => btn != index);
+        return;
+      }
+    });
+
+    throttle.axes.forEach((value, index) => {
+      // Potencia
+      if (index == 2) {
+        simulateAxeMove(index, value, 0);
+        return;
+      }
+    });
+  }
+
+  throttleListener = requestAnimationFrame(listenThrottle);
 }
